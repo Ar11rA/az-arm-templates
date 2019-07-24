@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "loadBalancers_lb_name": {
+          "defaultValue": "lb",
+          "type": "string"
+      },
+      "publicIPAddresses_pb_lb_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/publicIPAddresses/pb-lb",
+          "type": "string"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.Network/loadBalancers",
+          "apiVersion": "2019-04-01",
+          "name": "[parameters('loadBalancers_lb_name')]",
+          "location": "centralus",
+          "sku": {
+              "name": "Basic",
+              "tier": "Regional"
+          },
+          "properties": {
+              "provisioningState": "Succeeded",
+              "resourceGuid": "1a0cc9b3-e37c-4b90-a533-1636806bec28",
+              "frontendIPConfigurations": [
+                  {
+                      "name": "LoadBalancerFrontEnd",
+                      "etag": "W/\"d6040898-5625-408b-84ef-d74ebeefb494\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "privateIPAllocationMethod": "Dynamic",
+                          "publicIPAddress": {
+                              "id": "[parameters('publicIPAddresses_pb_lb_externalid')]"
+                          },
+                          "privateIPAddressVersion": "IPv4"
+                      }
+                  }
+              ],
+              "backendAddressPools": [
+                  {
+                      "name": "vmssbe",
+                      "etag": "W/\"d6040898-5625-408b-84ef-d74ebeefb494\"",
+                      "properties": {
+                          "provisioningState": "Succeeded"
+                      }
+                  },
+                  {
+                      "name": "vmsspool",
+                      "etag": "W/\"d6040898-5625-408b-84ef-d74ebeefb494\"",
+                      "properties": {
+                          "provisioningState": "Succeeded"
+                      }
+                  }
+              ],
+              "loadBalancingRules": [],
+              "probes": [
+                  {
+                      "name": "hp",
+                      "etag": "W/\"d6040898-5625-408b-84ef-d74ebeefb494\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "protocol": "Http",
+                          "port": 80,
+                          "requestPath": "/",
+                          "intervalInSeconds": 5,
+                          "numberOfProbes": 2
+                      }
+                  }
+              ],
+              "inboundNatRules": [],
+              "inboundNatPools": []
+          }
+      }
+  ]
+}

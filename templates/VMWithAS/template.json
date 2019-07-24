@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "virtualMachines_vm2_name": {
+          "defaultValue": "vm2",
+          "type": "string"
+      },
+      "availabilitySets_AZ01_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Compute/availabilitySets/AZ01",
+          "type": "string"
+      },
+      "disks_vm2_OsDisk_1_1d71ad9fd7c74b0faeb172b37164b70b_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Compute/disks/vm2_OsDisk_1_1d71ad9fd7c74b0faeb172b37164b70b",
+          "type": "string"
+      },
+      "networkInterfaces_vm276_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/networkInterfaces/vm276",
+          "type": "string"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.Compute/virtualMachines",
+          "apiVersion": "2019-03-01",
+          "name": "[parameters('virtualMachines_vm2_name')]",
+          "location": "centralus",
+          "properties": {
+              "availabilitySet": {
+                  "id": "[parameters('availabilitySets_AZ01_externalid')]"
+              },
+              "hardwareProfile": {
+                  "vmSize": "Standard_B1ms"
+              },
+              "storageProfile": {
+                  "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "18.04-LTS",
+                      "version": "latest"
+                  },
+                  "osDisk": {
+                      "osType": "Linux",
+                      "name": "[concat(parameters('virtualMachines_vm2_name'), '_OsDisk_1_1d71ad9fd7c74b0faeb172b37164b70b')]",
+                      "createOption": "FromImage",
+                      "caching": "ReadWrite",
+                      "managedDisk": {
+                          "storageAccountType": "Standard_LRS",
+                          "id": "[parameters('disks_vm2_OsDisk_1_1d71ad9fd7c74b0faeb172b37164b70b_externalid')]"
+                      },
+                      "diskSizeGB": 30
+                  },
+                  "dataDisks": []
+              },
+              "osProfile": {
+                  "computerName": "[parameters('virtualMachines_vm2_name')]",
+                  "adminUsername": "aritra",
+                  "linuxConfiguration": {
+                      "disablePasswordAuthentication": false,
+                      "provisionVMAgent": true
+                  },
+                  "secrets": [],
+                  "allowExtensionOperations": true
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[parameters('networkInterfaces_vm276_externalid')]"
+                      }
+                  ]
+              }
+          }
+      }
+  ]
+}

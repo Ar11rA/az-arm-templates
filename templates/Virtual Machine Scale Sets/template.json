@@ -1,0 +1,292 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "virtualMachineScaleSets_vmss_name": {
+          "defaultValue": "vmss",
+          "type": "string"
+      },
+      "virtualNetworks_VNet2_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/virtualNetworks/VNet2",
+          "type": "string"
+      },
+      "disks_vmss_vmss_2_OsDisk_1_a63b33a06e2848af8700403db97f63a9_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Compute/disks/vmss_vmss_2_OsDisk_1_a63b33a06e2848af8700403db97f63a9",
+          "type": "string"
+      },
+      "disks_vmss_vmss_3_OsDisk_1_bf04cc14641a4b5a8e421ed83c4316c4_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Compute/disks/vmss_vmss_3_OsDisk_1_bf04cc14641a4b5a8e421ed83c4316c4",
+          "type": "string"
+      },
+      "adm_pass": {
+        "type": "string"
+    }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.Compute/virtualMachineScaleSets",
+          "apiVersion": "2019-03-01",
+          "name": "[parameters('virtualMachineScaleSets_vmss_name')]",
+          "location": "centralus",
+          "sku": {
+              "name": "Standard_B1s",
+              "tier": "Standard",
+              "capacity": 2
+          },
+          "zones": [
+              "1",
+              "2"
+          ],
+          "properties": {
+              "singlePlacementGroup": false,
+              "upgradePolicy": {
+                  "mode": "Manual"
+              },
+              "virtualMachineProfile": {
+                  "osProfile": {
+                      "computerNamePrefix": "[concat(parameters('virtualMachineScaleSets_vmss_name'), 'iyeam')]",
+                      "adminUsername": "aritra",
+                      "adminPassword": "[parameters('adm_pass')]",
+                      "linuxConfiguration": {
+                          "disablePasswordAuthentication": false,
+                          "provisionVMAgent": true
+                      },
+                      "secrets": []
+                  },
+                  "storageProfile": {
+                      "osDisk": {
+                          "createOption": "FromImage",
+                          "caching": "ReadWrite",
+                          "managedDisk": {
+                              "storageAccountType": "Premium_LRS"
+                          }
+                      },
+                      "imageReference": {
+                          "publisher": "Canonical",
+                          "offer": "UbuntuServer",
+                          "sku": "18.04-LTS",
+                          "version": "latest"
+                      }
+                  },
+                  "networkProfile": {
+                      "networkInterfaceConfigurations": [
+                          {
+                              "name": "[concat(parameters('virtualMachineScaleSets_vmss_name'), 'Nic')]",
+                              "properties": {
+                                  "primary": true,
+                                  "enableAcceleratedNetworking": false,
+                                  "dnsSettings": {
+                                      "dnsServers": []
+                                  },
+                                  "enableIPForwarding": false,
+                                  "ipConfigurations": [
+                                      {
+                                          "name": "[concat(parameters('virtualMachineScaleSets_vmss_name'), 'IpConfig')]",
+                                          "properties": {
+                                              "publicIPAddressConfiguration": {
+                                                  "name": "pub1",
+                                                  "properties": {
+                                                      "idleTimeoutInMinutes": 15,
+                                                      "ipTags": []
+                                                  }
+                                              },
+                                              "subnet": {
+                                                  "id": "[concat(parameters('virtualNetworks_VNet2_externalid'), '/subnets/Subnet1')]"
+                                              },
+                                              "privateIPAddressVersion": "IPv4"
+                                          }
+                                      }
+                                  ]
+                              }
+                          }
+                      ]
+                  },
+                  "priority": "Regular"
+              },
+              "overprovision": true,
+              "doNotRunExtensionsOnOverprovisionedVMs": false,
+              "zoneBalance": false,
+              "platformFaultDomainCount": 1
+          }
+      },
+      {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/virtualMachines",
+          "apiVersion": "2019-03-01",
+          "name": "[concat(parameters('virtualMachineScaleSets_vmss_name'), '/2')]",
+          "location": "centralus",
+          "dependsOn": [
+              "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_name'))]"
+          ],
+          "sku": {
+              "name": "Standard_B1s",
+              "tier": "Standard"
+          },
+          "zones": [
+              "1"
+          ],
+          "properties": {
+              "networkProfileConfiguration": {
+                  "networkInterfaceConfigurations": [
+                      {
+                          "name": "vmssNic",
+                          "properties": {
+                              "primary": true,
+                              "enableAcceleratedNetworking": false,
+                              "dnsSettings": {
+                                  "dnsServers": []
+                              },
+                              "enableIPForwarding": false,
+                              "ipConfigurations": [
+                                  {
+                                      "name": "vmssIpConfig",
+                                      "properties": {
+                                          "publicIPAddressConfiguration": {
+                                              "name": "pub1",
+                                              "properties": {
+                                                  "idleTimeoutInMinutes": 15,
+                                                  "ipTags": []
+                                              }
+                                          },
+                                          "subnet": {
+                                              "id": "[concat(parameters('virtualNetworks_VNet2_externalid'), '/subnets/Subnet1')]"
+                                          },
+                                          "privateIPAddressVersion": "IPv4"
+                                      }
+                                  }
+                              ]
+                          }
+                      }
+                  ]
+              },
+              "hardwareProfile": {},
+              "storageProfile": {
+                  "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "18.04-LTS",
+                      "version": "18.04.201907221"
+                  },
+                  "osDisk": {
+                      "osType": "Linux",
+                      "name": "vmss_vmss_2_OsDisk_1_a63b33a06e2848af8700403db97f63a9",
+                      "createOption": "FromImage",
+                      "caching": "ReadWrite",
+                      "managedDisk": {
+                          "storageAccountType": "Premium_LRS",
+                          "id": "[parameters('disks_vmss_vmss_2_OsDisk_1_a63b33a06e2848af8700403db97f63a9_externalid')]"
+                      },
+                      "diskSizeGB": 30
+                  },
+                  "dataDisks": []
+              },
+              "osProfile": {
+                  "computerName": "vmssiyeam000002",
+                  "adminUsername": "aritra",
+                  "linuxConfiguration": {
+                      "disablePasswordAuthentication": false,
+                      "provisionVMAgent": true
+                  },
+                  "secrets": [],
+                  "allowExtensionOperations": true
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[concat(resourceId('Microsoft.Compute/virtualMachineScaleSets/virtualMachines', parameters('virtualMachineScaleSets_vmss_name'), '2'), '/networkInterfaces/vmssNic')]"
+                      }
+                  ]
+              }
+          }
+      },
+      {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/virtualMachines",
+          "apiVersion": "2019-03-01",
+          "name": "[concat(parameters('virtualMachineScaleSets_vmss_name'), '/3')]",
+          "location": "centralus",
+          "dependsOn": [
+              "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_name'))]"
+          ],
+          "sku": {
+              "name": "Standard_B1s",
+              "tier": "Standard"
+          },
+          "zones": [
+              "2"
+          ],
+          "properties": {
+              "networkProfileConfiguration": {
+                  "networkInterfaceConfigurations": [
+                      {
+                          "name": "vmssNic",
+                          "properties": {
+                              "primary": true,
+                              "enableAcceleratedNetworking": false,
+                              "dnsSettings": {
+                                  "dnsServers": []
+                              },
+                              "enableIPForwarding": false,
+                              "ipConfigurations": [
+                                  {
+                                      "name": "vmssIpConfig",
+                                      "properties": {
+                                          "publicIPAddressConfiguration": {
+                                              "name": "pub1",
+                                              "properties": {
+                                                  "idleTimeoutInMinutes": 15,
+                                                  "ipTags": []
+                                              }
+                                          },
+                                          "subnet": {
+                                              "id": "[concat(parameters('virtualNetworks_VNet2_externalid'), '/subnets/Subnet1')]"
+                                          },
+                                          "privateIPAddressVersion": "IPv4"
+                                      }
+                                  }
+                              ]
+                          }
+                      }
+                  ]
+              },
+              "hardwareProfile": {},
+              "storageProfile": {
+                  "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "18.04-LTS",
+                      "version": "18.04.201907221"
+                  },
+                  "osDisk": {
+                      "osType": "Linux",
+                      "name": "vmss_vmss_3_OsDisk_1_bf04cc14641a4b5a8e421ed83c4316c4",
+                      "createOption": "FromImage",
+                      "caching": "ReadWrite",
+                      "managedDisk": {
+                          "storageAccountType": "Premium_LRS",
+                          "id": "[parameters('disks_vmss_vmss_3_OsDisk_1_bf04cc14641a4b5a8e421ed83c4316c4_externalid')]"
+                      },
+                      "diskSizeGB": 30
+                  },
+                  "dataDisks": []
+              },
+              "osProfile": {
+                  "computerName": "vmssiyeam000003",
+                  "adminUsername": "aritra",
+                  "linuxConfiguration": {
+                      "disablePasswordAuthentication": false,
+                      "provisionVMAgent": true
+                  },
+                  "secrets": [],
+                  "allowExtensionOperations": true
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[concat(resourceId('Microsoft.Compute/virtualMachineScaleSets/virtualMachines', parameters('virtualMachineScaleSets_vmss_name'), '3'), '/networkInterfaces/vmssNic')]"
+                      }
+                  ]
+              }
+          }
+      }
+  ]
+}

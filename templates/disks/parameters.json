@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "disks_vm2_OsDisk_1_1d71ad9fd7c74b0faeb172b37164b70b_name": {
+          "value": null
+      }
+  }
+}

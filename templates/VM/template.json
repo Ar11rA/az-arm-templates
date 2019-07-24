@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_vm1_name": {
+            "defaultValue": "vm1",
+            "type": "string"
+        },
+        "disks_vm1_OsDisk_1_28a27748bc6a4f96955f045b09c7e665_externalid": {
+            "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Compute/disks/vm1_OsDisk_1_28a27748bc6a4f96955f045b09c7e665",
+            "type": "string"
+        },
+        "networkInterfaces_vm1902_externalid": {
+            "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/networkInterfaces/vm1902",
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "name": "[parameters('virtualMachines_vm1_name')]",
+            "location": "centralus",
+            "tags": {
+                "name": "learnrgvm"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B1ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_vm1_name'), '_OsDisk_1_28a27748bc6a4f96955f045b09c7e665')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS",
+                            "id": "[parameters('disks_vm1_OsDisk_1_28a27748bc6a4f96955f045b09c7e665_externalid')]"
+                        },
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_vm1_name')]",
+                    "adminUsername": "aritra",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_vm1902_externalid')]"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
