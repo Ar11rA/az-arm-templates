@@ -1,0 +1,1 @@
+ az group deployment create --resource-group learnrg --template-file ./template.json 
