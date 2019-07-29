@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "databaseAccounts_cosacc_name": {
+          "defaultValue": "cosacc",
+          "type": "String"
+      },
+      "virtualNetworks_vnetcosmos_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/virtualNetworks/vnetcosmos",
+          "type": "String"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.DocumentDB/databaseAccounts",
+          "apiVersion": "2015-04-08",
+          "name": "[parameters('databaseAccounts_cosacc_name')]",
+          "location": "Central US",
+          "tags": {
+              "defaultExperience": "Core (SQL)"
+          },
+          "kind": "GlobalDocumentDB",
+          "properties": {
+              "ipRangeFilter": "104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26,156.107.90.74",
+              "enableAutomaticFailover": false,
+              "enableMultipleWriteLocations": true,
+              "isVirtualNetworkFilterEnabled": true,
+              "virtualNetworkRules": [
+                  {
+                      "id": "[concat(parameters('virtualNetworks_vnetcosmos_externalid'), '/subnets/vnetsub1')]",
+                      "ignoreMissingVNetServiceEndpoint": false
+                  }
+              ],
+              "databaseAccountOfferType": "Standard",
+              "consistencyPolicy": {
+                  "defaultConsistencyLevel": "Session",
+                  "maxIntervalInSeconds": 5,
+                  "maxStalenessPrefix": 100
+              },
+              "locations": [
+                  {
+                      "locationName": "Central US",
+                      "provisioningState": "Succeeded",
+                      "failoverPriority": 0,
+                      "isZoneRedundant": true
+                  },
+                  {
+                      "locationName": "East US 2",
+                      "provisioningState": "Creating",
+                      "failoverPriority": 1,
+                      "isZoneRedundant": false
+                  }
+              ],
+              "capabilities": []
+          }
+      }
+  ]
+}
