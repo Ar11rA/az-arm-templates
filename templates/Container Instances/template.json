@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "containerGroups_ciname_name": {
+          "defaultValue": "ciname",
+          "type": "String"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.ContainerInstance/containerGroups",
+          "apiVersion": "2018-04-01",
+          "name": "[parameters('containerGroups_ciname_name')]",
+          "location": "centralus",
+          "properties": {
+              "containers": [
+                  {
+                      "name": "[parameters('containerGroups_ciname_name')]",
+                      "properties": {
+                          "image": "regacc.azurecr.io/swa:v1",
+                          "ports": [
+                              {
+                                  "port": 80
+                              }
+                          ],
+                          "environmentVariables": [],
+                          "resources": {
+                              "requests": {
+                                  "memoryInGB": 1.5,
+                                  "cpu": 1
+                              }
+                          }
+                      }
+                  }
+              ],
+              "imageRegistryCredentials": [
+                  {
+                      "server": "regacc.azurecr.io",
+                      "username": "regacc"
+                  }
+              ],
+              "ipAddress": {
+                  "ports": [
+                      {
+                          "protocol": "TCP",
+                          "port": 80
+                      }
+                  ],
+                  "ip": "52.158.212.200",
+                  "type": "Public"
+              },
+              "osType": "Linux"
+          }
+      }
+  ]
+}

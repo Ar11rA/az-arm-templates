@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "registries_regacc_name": {
+          "defaultValue": "regacc",
+          "type": "String"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.ContainerRegistry/registries",
+          "apiVersion": "2017-10-01",
+          "name": "[parameters('registries_regacc_name')]",
+          "location": "centralus",
+          "sku": {
+              "name": "Basic",
+              "tier": "Basic"
+          },
+          "properties": {
+              "adminUserEnabled": false
+          }
+      }
+  ]
+}
