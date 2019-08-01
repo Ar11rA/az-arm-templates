@@ -46,7 +46,7 @@
       },
       "location": {
         "type": "string",
-        "defaultValue": "[resourceGroup().location]",
+        "defaultValue": "Central US",
         "metadata": {
           "description": "Location for all resources."
         }

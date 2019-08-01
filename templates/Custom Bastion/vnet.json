@@ -1,0 +1,107 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworks_vnet_name": {
+      "defaultValue": "vnet",
+      "type": "string"
+    },
+    "networkSecurityGroups_subnetsg_externalid": {
+      "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/networkSecurityGroups/subnetsg",
+      "type": "string"
+    },
+    "virtualNetworks_sub1_name": {
+      "defaultValue": "sub1",
+      "type": "string"
+    },
+    "virtualNetworks_sub2_name": {
+      "defaultValue": "sub2",
+      "type": "string"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2019-06-01",
+      "name": "[parameters('virtualNetworks_vnet_name')]",
+      "location": "centralus",
+      "properties": {
+        "provisioningState": "Succeeded",
+        "resourceGuid": "671af460-0ce8-4555-badd-fa0a33fc81b1",
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('virtualNetworks_sub1_name')]",
+            "etag": "W/\"24d8fc13-95bc-4e2a-9d12-6dcc233f1d9a\"",
+            "properties": {
+              "provisioningState": "Succeeded",
+              "addressPrefix": "10.0.0.0/24",
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          },
+          {
+            "name": "[parameters('virtualNetworks_sub2_name')]",
+            "etag": "W/\"24d8fc13-95bc-4e2a-9d12-6dcc233f1d9a\"",
+            "properties": {
+              "provisioningState": "Succeeded",
+              "addressPrefix": "10.0.1.0/24",
+              "networkSecurityGroup": {
+                "id": "[parameters('networkSecurityGroups_subnetsg_externalid')]"
+              },
+              "serviceEndpoints": [],
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          }
+        ],
+        "virtualNetworkPeerings": [],
+        "enableDdosProtection": false,
+        "enableVmProtection": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2019-06-01",
+      "location": "centralus",
+      "name": "[concat(parameters('virtualNetworks_vnet_name'), '/',parameters('virtualNetworks_sub1_name'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_name'))]"
+      ],
+      "properties": {
+        "provisioningState": "Succeeded",
+        "addressPrefix": "10.0.0.0/24",
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2019-06-01",
+      "location": "centralus",
+      "name": "[concat(parameters('virtualNetworks_vnet_name'), '/', parameters('virtualNetworks_sub2_name'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_name'))]"
+      ],
+      "properties": {
+        "provisioningState": "Succeeded",
+        "addressPrefix": "10.0.1.0/24",
+        "networkSecurityGroup": {
+          "id": "[parameters('networkSecurityGroups_subnetsg_externalid')]"
+        },
+        "serviceEndpoints": [],
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      }
+    }
+  ]
+}

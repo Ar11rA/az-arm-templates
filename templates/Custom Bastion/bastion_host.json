@@ -1,0 +1,375 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "virtualMachines_vm_bastion_name": {
+          "defaultValue": "vm-bastion",
+          "type": "String"
+      },
+      "networkInterfaces_vm_bastion40_name": {
+          "defaultValue": "vm-bastion40",
+          "type": "String"
+      },
+      "publicIPAddresses_vm_bastion_ip_name": {
+          "defaultValue": "vm-bastion-ip",
+          "type": "String"
+      },
+      "networkSecurityGroups_vm_bastion_nsg_name": {
+          "defaultValue": "vm-bastion-nsg",
+          "type": "String"
+      },
+      "virtualNetworks_vnet_externalid": {
+          "defaultValue": "/subscriptions/0caba96c-2f0d-4d96-8e8e-afbc7a0f7447/resourceGroups/learnrg/providers/Microsoft.Network/virtualNetworks/vnet",
+          "type": "String"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.Network/networkSecurityGroups",
+          "apiVersion": "2019-06-01",
+          "name": "[parameters('networkSecurityGroups_vm_bastion_nsg_name')]",
+          "location": "centralus",
+          "tags": {
+              "name": "bastion"
+          },
+          "properties": {
+              "provisioningState": "Succeeded",
+              "resourceGuid": "496d0b01-5275-4cc8-a620-167ab0854716",
+              "securityRules": [
+                  {
+                      "name": "default-allow-ssh",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "protocol": "TCP",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "22",
+                          "sourceAddressPrefix": "*",
+                          "destinationAddressPrefix": "*",
+                          "access": "Allow",
+                          "priority": 1000,
+                          "direction": "Inbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  },
+                  {
+                      "name": "allow_all",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "*",
+                          "destinationAddressPrefix": "*",
+                          "access": "Allow",
+                          "priority": 100,
+                          "direction": "Outbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  }
+              ],
+              "defaultSecurityRules": [
+                  {
+                      "name": "AllowVnetInBound",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "description": "Allow inbound traffic from all VMs in VNET",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "VirtualNetwork",
+                          "destinationAddressPrefix": "VirtualNetwork",
+                          "access": "Allow",
+                          "priority": 65000,
+                          "direction": "Inbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  },
+                  {
+                      "name": "AllowAzureLoadBalancerInBound",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "description": "Allow inbound traffic from azure load balancer",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "AzureLoadBalancer",
+                          "destinationAddressPrefix": "*",
+                          "access": "Allow",
+                          "priority": 65001,
+                          "direction": "Inbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  },
+                  {
+                      "name": "DenyAllInBound",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "description": "Deny all inbound traffic",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "*",
+                          "destinationAddressPrefix": "*",
+                          "access": "Deny",
+                          "priority": 65500,
+                          "direction": "Inbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  },
+                  {
+                      "name": "AllowVnetOutBound",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "description": "Allow outbound traffic from all VMs to all VMs in VNET",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "VirtualNetwork",
+                          "destinationAddressPrefix": "VirtualNetwork",
+                          "access": "Allow",
+                          "priority": 65000,
+                          "direction": "Outbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  },
+                  {
+                      "name": "AllowInternetOutBound",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "description": "Allow outbound traffic from all VMs to Internet",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "*",
+                          "destinationAddressPrefix": "Internet",
+                          "access": "Allow",
+                          "priority": 65001,
+                          "direction": "Outbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  },
+                  {
+                      "name": "DenyAllOutBound",
+                      "etag": "W/\"5c00dfb0-e39e-4082-a159-effe82e051f3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "description": "Deny all outbound traffic",
+                          "protocol": "*",
+                          "sourcePortRange": "*",
+                          "destinationPortRange": "*",
+                          "sourceAddressPrefix": "*",
+                          "destinationAddressPrefix": "*",
+                          "access": "Deny",
+                          "priority": 65500,
+                          "direction": "Outbound",
+                          "sourcePortRanges": [],
+                          "destinationPortRanges": [],
+                          "sourceAddressPrefixes": [],
+                          "destinationAddressPrefixes": []
+                      }
+                  }
+              ]
+          }
+      },
+      {
+          "type": "Microsoft.Network/publicIPAddresses",
+          "apiVersion": "2019-06-01",
+          "name": "[parameters('publicIPAddresses_vm_bastion_ip_name')]",
+          "location": "centralus",
+          "tags": {
+              "name": "bastion"
+          },
+          "sku": {
+              "name": "Basic",
+              "tier": "Regional"
+          },
+          "properties": {
+              "provisioningState": "Succeeded",
+              "resourceGuid": "301879cf-1006-44d1-8155-a09d2bafa26f",
+              "ipAddress": "40.122.64.126",
+              "publicIPAddressVersion": "IPv4",
+              "publicIPAllocationMethod": "Dynamic",
+              "idleTimeoutInMinutes": 4,
+              "ipTags": []
+          }
+      },
+      {
+          "type": "Microsoft.Compute/virtualMachines",
+          "apiVersion": "2019-03-01",
+          "name": "[parameters('virtualMachines_vm_bastion_name')]",
+          "location": "centralus",
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_bastion40_name'))]"
+          ],
+          "tags": {
+              "name": "bastion"
+          },
+          "properties": {
+              "hardwareProfile": {
+                  "vmSize": "Standard_B1ls"
+              },
+              "storageProfile": {
+                  "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "18.04-LTS",
+                      "version": "latest"
+                  },
+                  "osDisk": {
+                      "osType": "Linux",
+                      "name": "[concat(parameters('virtualMachines_vm_bastion_name'), '_OsDisk_1_8f11623afdeb4490810a32ba9a85511e')]",
+                      "createOption": "FromImage",
+                      "caching": "ReadWrite",
+                      "managedDisk": {
+                          "storageAccountType": "Standard_LRS",
+                          "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_vm_bastion_name'), '_OsDisk_1_8f11623afdeb4490810a32ba9a85511e'))]"
+                      },
+                      "diskSizeGB": 30
+                  },
+                  "dataDisks": []
+              },
+              "osProfile": {
+                  "computerName": "[parameters('virtualMachines_vm_bastion_name')]",
+                  "adminUsername": "aritra",
+                  "linuxConfiguration": {
+                      "disablePasswordAuthentication": false,
+                      "provisionVMAgent": true
+                  },
+                  "secrets": [],
+                  "allowExtensionOperations": true
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_bastion40_name'))]"
+                      }
+                  ]
+              }
+          }
+      },
+      {
+          "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+          "apiVersion": "2019-06-01",
+          "name": "[concat(parameters('networkSecurityGroups_vm_bastion_nsg_name'), '/allow_all')]",
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_bastion_nsg_name'))]"
+          ],
+          "properties": {
+              "provisioningState": "Succeeded",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Outbound",
+              "sourcePortRanges": [],
+              "destinationPortRanges": [],
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+          }
+      },
+      {
+          "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+          "apiVersion": "2019-06-01",
+          "name": "[concat(parameters('networkSecurityGroups_vm_bastion_nsg_name'), '/default-allow-ssh')]",
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_bastion_nsg_name'))]"
+          ],
+          "properties": {
+              "provisioningState": "Succeeded",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound",
+              "sourcePortRanges": [],
+              "destinationPortRanges": [],
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+          }
+      },
+      {
+          "type": "Microsoft.Network/networkInterfaces",
+          "apiVersion": "2019-06-01",
+          "name": "[parameters('networkInterfaces_vm_bastion40_name')]",
+          "location": "centralus",
+          "dependsOn": [
+              "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vm_bastion_ip_name'))]",
+              "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_bastion_nsg_name'))]"
+          ],
+          "tags": {
+              "name": "bastion"
+          },
+          "properties": {
+              "provisioningState": "Succeeded",
+              "resourceGuid": "5c7a5e55-2cbc-4b7c-88b7-1babf44e96d9",
+              "ipConfigurations": [
+                  {
+                      "name": "ipconfig1",
+                      "etag": "W/\"69c8a2b2-c0e6-46f3-990f-10ef9c188ba3\"",
+                      "properties": {
+                          "provisioningState": "Succeeded",
+                          "privateIPAddress": "10.0.0.4",
+                          "privateIPAllocationMethod": "Dynamic",
+                          "publicIPAddress": {
+                              "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vm_bastion_ip_name'))]"
+                          },
+                          "subnet": {
+                              "id": "[concat(parameters('virtualNetworks_vnet_externalid'), '/subnets/sub1')]"
+                          },
+                          "primary": true,
+                          "privateIPAddressVersion": "IPv4"
+                      }
+                  }
+              ],
+              "dnsSettings": {
+                  "dnsServers": [],
+                  "appliedDnsServers": [],
+                  "internalDomainNameSuffix": "md0buz5ibrkulow35ifdh5ebwb.gx.internal.cloudapp.net"
+              },
+              "macAddress": "00-0D-3A-90-01-9F",
+              "enableAcceleratedNetworking": false,
+              "enableIPForwarding": false,
+              "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_bastion_nsg_name'))]"
+              },
+              "primary": true,
+              "tapConfigurations": []
+          }
+      }
+  ]
+}
